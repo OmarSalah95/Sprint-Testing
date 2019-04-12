@@ -91,6 +91,7 @@ describe('Server JS', () => {
             expect(response.body).toEqual([]);
         });
 
+
         describe('Get by ID', () => {
             it("returns 404 if that game id does not exist in the db", async () => {
                 let response = await request(server).get(`/games/1`);
@@ -115,11 +116,11 @@ describe('Server JS', () => {
               title: "Pepsi Man",
               genre: "arcade"
             });
-            let gameId = await db("games")
+            let dbGame = await db("games")
               .where({ title: "Pepsi Man" })
               .select("games.id")
               .first();
-            let response = await request(server).get(`/games/${gameId.id}`);
+            let response = await request(server).get(`/games/${dbGame.id}`);
             expect(response.body).toEqual([
               {
                 id: 1,
@@ -150,7 +151,20 @@ describe('Server JS', () => {
             let response = await request(server).delete(`/games/1`);
             expect(response.status).toBe(404);
         });
-
+        
+        it("deletes game from the db", async () => {
+            await db("games").insert({
+              title: "Dark Souls",
+              genre: "Annoying AF"
+            });
+            let dbGame = await db("games")
+              .where({ title: "Dark Souls" })
+              .select("games.id")
+              .first();
+            await request(server).delete(`/games/${dbGame.id}`);
+            let rows = await db("games");
+            expect(rows.length).toBe(0);
+        });
     });
 
     
