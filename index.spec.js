@@ -62,8 +62,7 @@ describe('Server JS', () => {
               .send({ title: "Apex Legends", genre: "FPS BR" });
             expect(response.status).toBe(405);
             expect(response.body).toEqual({ message: "That game already exists." });
-      });
-          
+      }); 
     });
 
     describe("/games GET route", () => {
