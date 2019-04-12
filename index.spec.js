@@ -133,7 +133,24 @@ describe('Server JS', () => {
     });
     
     describe('/games delete endpoint', () => {
-        
+        it("returns 200 if deletion was successful", async () => {
+            await db("games").insert({
+              title: "Legends of Zelda",
+              genre: "adventure"
+            });
+            let gameId = await db("games")
+              .where({ title: "Legends of Zelda" })
+              .select("games.id")
+              .first();
+            let response = await request(server).delete(`/games/${gameId.id}`);
+            expect(response.status).toBe(200);
+        });
+
+        it("returns 404 if that game id does not exist in the db", async () => {
+            let response = await request(server).delete(`/games/1`);
+            expect(response.status).toBe(404);
+        });
+
     });
 
     
