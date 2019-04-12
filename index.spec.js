@@ -110,6 +110,25 @@ describe('Server JS', () => {
             expect(response.status).toBe(200);
           });
 
+          it("returns the game if it exists in the db and the request is successful", async () => {
+            await db("games").insert({
+              title: "Pepsi Man",
+              genre: "arcade"
+            });
+            let gameId = await db("games")
+              .where({ title: "Pepsi Man" })
+              .select("games.id")
+              .first();
+            let response = await request(server).get(`/games/${gameId.id}`);
+            expect(response.body).toEqual([
+              {
+                id: 1,
+                title: "Pepsi Man",
+                genre: "arcade",
+                releaseYear: null
+              }
+            ]);
+          });
         });
     });
     
