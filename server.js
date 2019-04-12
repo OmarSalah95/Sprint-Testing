@@ -8,6 +8,14 @@ server.get("/", (req, res) => {
   res.send("** Server Is Active **");
 });
 
+server.get("/games", (req, res) => {
+    db("games")
+      .then(games => {
+        res.status(200).json(games);
+      })
+      .catch(err => res.status(500).json(err));
+  });
+  
 
 server.post("/games", (req, res) => {
     const game = req.body;

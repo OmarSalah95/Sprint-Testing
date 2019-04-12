@@ -41,8 +41,26 @@ describe('Server JS', () => {
           expect(games).toHaveLength(2);
         });
     
+        it("returns status 422 if required fields are missing", async () => {
+            let response = await request(server)
+              .post("/games")
+              .send({ title: "Apex Legends" });
+            expect(response.status).toBe(422);
+            expect(response.body).toEqual({
+              message:
+                "Please fill out a title and genre before submitting"
+            });
+          });
+    });
+
+    describe("/games GET route", () => {
         
+        it("returns status 200 upon successful request", async () => {
+          let response = await request(server).get("/games");
+          expect(response.status).toBe(200);
+        });
     
+        
     });
     
 
