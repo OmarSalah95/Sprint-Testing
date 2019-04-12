@@ -90,8 +90,32 @@ describe('Server JS', () => {
             let response = await request(server).get("/games");
             expect(response.body).toEqual([]);
         });
+
+        describe('Get by ID', () => {
+            it("returns 404 if that game id does not exist in the db", async () => {
+                let response = await request(server).get(`/games/1`);
+                expect(response.status).toBe(404);
+          });
+
+          it("returns 200 if game exists", async () => {
+            await db("games").insert({
+              title: "Shadow of Mordor",
+              genre: "adventure"
+            });
+            let gameId = await db("games")
+              .where({ title: "Shadow of Mordor" })
+              .select("games.id")
+              .first();
+            let response = await request(server).get(`/games/${gameId.id}`);
+            expect(response.status).toBe(200);
+          });
+
+        });
     });
     
+    describe('/games delete endpoint', () => {
+        
+    });
 
     
 });
