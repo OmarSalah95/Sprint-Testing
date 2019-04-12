@@ -50,7 +50,20 @@ describe('Server JS', () => {
               message:
                 "Please fill out a title and genre before submitting"
             });
-          });
+        });
+
+        it("returns status 405 if submitted game name already exists in db", async () => {
+            await db("games").insert({
+              title: "Apex Legends",
+              genre: "FPS BR"
+            });
+            let response = await request(server)
+              .post("/games")
+              .send({ title: "Apex Legends", genre: "FPS BR" });
+            expect(response.status).toBe(405);
+            expect(response.body).toEqual({ message: "That game already exists." });
+      });
+          
     });
 
     describe("/games GET route", () => {
@@ -59,8 +72,25 @@ describe('Server JS', () => {
           let response = await request(server).get("/games");
           expect(response.status).toBe(200);
         });
-    
-        
+
+        it("returns an array", async () => {
+            let response = await request(server).get("/games");
+            expect(Array.isArray(response.body)).toBe(true);
+        });
+
+        it("returns an array of games in the db if the db is populated", async () => {
+            await db("games").insert({
+              title: "GTA",
+              genre: "RPG"
+            });
+            let response = await request(server).get("/games");
+            expect(response.body).toHaveLength(1);
+        });
+
+        it("returns an empty array if no games exist in the db", async () => {
+            let response = await request(server).get("/games");
+            expect(response.body).toEqual([]);
+        });
     });
     
 
