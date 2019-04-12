@@ -90,8 +90,82 @@ describe('Server JS', () => {
             let response = await request(server).get("/games");
             expect(response.body).toEqual([]);
         });
+
+
+        describe('Get by ID', () => {
+            it("returns 404 if that game id does not exist in the db", async () => {
+                let response = await request(server).get(`/games/1`);
+                expect(response.status).toBe(404);
+          });
+
+          it("returns 200 if game exists", async () => {
+            await db("games").insert({
+              title: "Shadow of Mordor",
+              genre: "adventure"
+            });
+            let gameId = await db("games")
+              .where({ title: "Shadow of Mordor" })
+              .select("games.id")
+              .first();
+            let response = await request(server).get(`/games/${gameId.id}`);
+            expect(response.status).toBe(200);
+          });
+
+          it("returns the game if it exists in the db and the request is successful", async () => {
+            await db("games").insert({
+              title: "Pepsi Man",
+              genre: "arcade"
+            });
+            let dbGame = await db("games")
+              .where({ title: "Pepsi Man" })
+              .select("games.id")
+              .first();
+            let response = await request(server).get(`/games/${dbGame.id}`);
+            expect(response.body).toEqual([
+              {
+                id: 1,
+                title: "Pepsi Man",
+                genre: "arcade",
+                releaseYear: null
+              }
+            ]);
+          });
+        });
     });
     
+    describe('/games delete endpoint', () => {
+        it("returns 200 if deletion was successful", async () => {
+            await db("games").insert({
+              title: "Legends of Zelda",
+              genre: "adventure"
+            });
+            let gameId = await db("games")
+              .where({ title: "Legends of Zelda" })
+              .select("games.id")
+              .first();
+            let response = await request(server).delete(`/games/${gameId.id}`);
+            expect(response.status).toBe(200);
+        });
+
+        it("returns 404 if that game id does not exist in the db", async () => {
+            let response = await request(server).delete(`/games/1`);
+            expect(response.status).toBe(404);
+        });
+        
+        it("deletes game from the db", async () => {
+            await db("games").insert({
+              title: "Dark Souls",
+              genre: "Annoying AF"
+            });
+            let dbGame = await db("games")
+              .where({ title: "Dark Souls" })
+              .select("games.id")
+              .first();
+            await request(server).delete(`/games/${dbGame.id}`);
+            let rows = await db("games");
+            expect(rows.length).toBe(0);
+        });
+    });
 
     
 });

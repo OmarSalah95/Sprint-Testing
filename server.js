@@ -33,6 +33,31 @@ server.post("/games", (req, res) => {
                     .then(id => res.status(201).json(id))
                     .catch(err => res.status(500).json(err));
             });
+});
+
+server.get("/games/:id", (req, res) => {
+    const { id } = req.params;
+    db("games")
+      .where({ id })
+      .then(game => {
+        game && game.length
+            ? res.status(200).json(game)
+            : res.status(404).json({ message: "That game already exists" });
+      })
+      .catch(err => res.status(500).json(err));
   });
+
+server.delete("/games/:id", (req, res) => {
+    const { id } = req.params;
+    db("games")
+        .where({ id })
+        .del()
+            .then(count => {
+            count
+                ? res.status(200).json(count)
+                : res.status(404).json({ message: "No game with that id exists" });
+            })
+            .catch(err => res.status(500).json(err));
+});
 
 module.exports = server;
